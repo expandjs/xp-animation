@@ -134,7 +134,7 @@ It must be used in conjunction with xp-animation.
              * @method play
              */
             play: function () {
-                if (this.state !== 'running') { XP.requestAnimationFrame(this.execute.bind(this, 'play')); }
+                if (this.state !== 'running') { XP.delay(this.execute.bind(this, 'play')); }
             },
 
             /**
