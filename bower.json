@@ -1,7 +1,7 @@
 {
   "name": "xp-animation",
   "license": "BSD-3-Clause",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "description": "Custom element used to create dynamic web animations in a declarative way",
   "homepage": "http://www.expandjs.com/elements/xp-animation",
   "authors": [
