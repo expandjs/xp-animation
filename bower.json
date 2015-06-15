@@ -25,10 +25,10 @@
     "**/.*"
   ],
   "dependencies": {
-    "expandjs": "ExpandJS/expandjs",
-    "xp-master-state": "ExpandJS/xp-master-state",
-    "xp-slave-state": "ExpandJS/xp-slave-state",
-    "xp-targeter": "ExpandJS/xp-targeter",
+    "expandjs": "ExpandJS/expandjs#alpha",
+    "xp-master-state": "ExpandJS/xp-master-state#alpha",
+    "xp-slave-state": "ExpandJS/xp-slave-state#alpha",
+    "xp-targeter": "ExpandJS/xp-targeter#alpha",
     "polymer": "Polymer/polymer#^0.5",
     "web-animations-js": "Web-Animations/web-animations-js"
   }
