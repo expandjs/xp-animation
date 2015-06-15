@@ -30,6 +30,6 @@
     "xp-slave-state": "ExpandJS/xp-slave-state#alpha",
     "xp-targeter": "ExpandJS/xp-targeter#alpha",
     "polymer": "Polymer/polymer#^0.5",
-    "web-animations-js": "Web-Animations/web-animations-js"
+    "web-animations-js": "Web-Animations/web-animations-js#1.0.7"
   }
 }
