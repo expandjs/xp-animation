@@ -1,0 +1,35 @@
+{
+  "name": "xp-animation",
+  "license": "BSD-3-Clause",
+  "version": "0.9.0",
+  "description": "A custom element used to create dynamic web animations in a declarative way",
+  "homepage": "http://expandjs.com/elements/xp-animation",
+  "authors": [
+    "Giuliano Rullo <g.rullo@expandjs.com>",
+    "Maurizio Stefàno <m.stefano@expandjs.com>",
+    "Robert Manolea <r.manolea@expandjs.com>"
+  ],
+  "keywords": [
+    "web animation",
+    "declarative web animation",
+    "web app",
+    "html5",
+    "expandjs",
+    "web-components"
+  ],
+  "main": [
+    "xp-animation-group.html",
+    "xp-animation.html"
+  ],
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "expandjs": "ExpandJS/expandjs",
+    "xp-master-state": "ExpandJS/xp-master-state",
+    "xp-slave-state": "ExpandJS/xp-slave-state",
+    "xp-targeter-behavior": "ExpandJS/xp-targeter-behavior",
+    "polymer": "Polymer/polymer",
+    "web-animations-js": "Web-Animations/web-animations-js"
+  }
+}
