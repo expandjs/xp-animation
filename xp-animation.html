@@ -16,13 +16,13 @@ It can be used in conjunction with xp-animation-group.
 @group functionality
 @homepage http://expandjs.com/elements/xp-animation
 
-@behavior xp-targeter-behavior http://expandjs.com/elements/xp-targeter-behavior
+@behavior xp-targeter-behavior http://expandjs.com/elements/xp-targeter-behavior#0.9.1
 
-@dependency web-animations-js Web-Animations/web-animations-js
-@dependency polymer Polymer/polymer
-@dependency expandjs ExpandJS/expandjs
-@dependency xp-slave-state ExpandJS/xp-slave-state
-@dependency xp-targeter-behavior ExpandJS/xp-targeter-behavior
+@dependency web-animations-js Web-Animations/web-animations-js^2.1.0
+@dependency polymer Polymer/polymer#^1.0.4
+@dependency expandjs ExpandJS/expandjs#0.9.1
+@dependency xp-slave-state ExpandJS/xp-slave-state#0.9.1
+@dependency xp-targeter-behavior ExpandJS/xp-targeter-behavior#0.9.1
 -->
 
 <script src="../web-animations-js/web-animations-next.min.js"></script>
@@ -40,7 +40,7 @@ It can be used in conjunction with xp-animation-group.
     </style>
 
     <template>
-        <xp-slave-state master="{{group}}" masterTag="xp-animation-group"></xp-slave-state>
+        <template is="xp-slave-state" master="{{group}}" master-tag="xp-animation-group"></template>
     </template>
 
     <script>
