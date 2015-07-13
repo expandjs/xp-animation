@@ -16,13 +16,17 @@ It must be used in conjunction with xp-animation.
 @group functionality
 @homepage http://expandjs.com/elements/xp-animation-group
 
+@behavior xp-adapter-behavior http://expandjs.com/elements/xp-adapter-behavior
+
 @dependency polymer Polymer/polymer#^1.0.0
-@dependency expandjs ExpandJS/expandjs#0.9.3
-@dependency xp-master-state ExpandJS/xp-master-state#0.9.3
+@dependency expandjs ExpandJS/expandjs#0.9.4
+@dependency xp-adapter-behavior ExpandJS/xp-adapter-behavior#0.9.4
+@dependency xp-master-state ExpandJS/xp-master-state#0.9.4
 -->
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../expandjs/expandjs.html">
+<link rel="import" href="../xp-adapter-behavior/xp-adapter-behavior.html">
 <link rel="import" href="../xp-master-state/xp-master-state.html">
 <link rel="import" href="xp-animation.html">
 
@@ -44,6 +48,11 @@ It must be used in conjunction with xp-animation.
 
             // ELEMENT
             is: 'xp-animation-group',
+
+            // BEHAVIORS
+            behaviors: [
+                Polymer.XPAdapterBehavior
+            ],
 
             /*********************************************************************/
 
@@ -172,10 +181,10 @@ It must be used in conjunction with xp-animation.
             /*********************************************************************/
 
             /**
-             * Creates the adaptee.
+             * Used to set the adaptee.
              *
              * @method _adapt
-             * @returns {Element}
+             * @returns {Object}
              * @private
              */
             _adapt: function () {
@@ -193,7 +202,7 @@ It must be used in conjunction with xp-animation.
                 // Canceling
                 self.player.cancel();
 
-                return self;
+                return self.adaptee;
             },
 
             /**
@@ -265,21 +274,6 @@ It must be used in conjunction with xp-animation.
 
             // PROPERTIES
             properties: {
-
-                /**
-                 * The adapted object.
-                 *
-                 * @attribute adaptee
-                 * @type Object
-                 * @notifies
-                 * @readonly
-                 */
-                adaptee: {
-                    notify: true,
-                    readOnly: true,
-                    type: Object,
-                    value: null
-                },
 
                 /**
                  * The slave animations.
