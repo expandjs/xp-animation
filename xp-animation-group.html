@@ -19,17 +19,18 @@ It must be used in conjunction with xp-animation.
 @repository https://github.com/ExpandJS/xp-animation-group
 
 @behavior xp-adapter-behavior /bower_components/xp-adapter-behavior/xp-adapter-behavior.html
+@behavior xp-master-behavior /bower_components/xp-master-behavior/xp-master-behavior.html
 
 @dependency polymer Polymer/polymer#^1.0.0
-@dependency expandjs ExpandJS/expandjs#0.9.5
-@dependency xp-adapter-behavior ExpandJS/xp-adapter-behavior#0.9.5
-@dependency xp-master-state ExpandJS/xp-master-state#0.9.5
+@dependency expandjs ExpandJS/expandjs#0.9.6
+@dependency xp-adapter-behavior ExpandJS/xp-adapter-behavior#0.9.6
+@dependency xp-master-behavior ExpandJS/xp-master-behavior#0.9.6
 -->
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../expandjs/expandjs.html">
 <link rel="import" href="../xp-adapter-behavior/xp-adapter-behavior.html">
-<link rel="import" href="../xp-master-state/xp-master-state.html">
+<link rel="import" href="../xp-master-behavior/xp-master-behavior.html">
 <link rel="import" href="xp-animation.html">
 
 <dom-module id="xp-animation-group">
@@ -41,7 +42,6 @@ It must be used in conjunction with xp-animation.
     </style>
 
     <template>
-        <template is="xp-master-state" id="xpMasterState" slaves="{{animations}}" slave-tag="xp-animation"></template>
         <content id="content"></content>
     </template>
 
@@ -53,7 +53,8 @@ It must be used in conjunction with xp-animation.
 
             // BEHAVIORS
             behaviors: [
-                Polymer.XPAdapterBehavior
+                Polymer.XPAdapterBehavior,
+                Polymer.XPMasterBehavior
             ],
 
             /*********************************************************************/
@@ -267,6 +268,17 @@ It must be used in conjunction with xp-animation.
                 return self;
             },
 
+            /**
+             * Returns the slaves map.
+             *
+             * @method _setupSlaves
+             * @returns {Object}
+             * @private
+             */
+            _setupSlaves: function () {
+                return {animations: 'xp-animation'};
+            },
+
             /*********************************************************************/
 
             // OBSERVERS
@@ -287,7 +299,9 @@ It must be used in conjunction with xp-animation.
                  */
                 animations: {
                     notify: true,
-                    type: Array
+                    readOnly: true,
+                    type: Array,
+                    value: function () { return []; }
                 },
 
                 /**
