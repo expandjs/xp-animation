@@ -7,22 +7,24 @@ The complete set of contributors may be found at https://expandjs.github.io/CONT
 -->
 
 <!--
-This element is used to group multiple animations.
+A custom element used to group multiple animations.
 
-It must be used in conjunction with xp-animation.
+It must be used in conjunction with
+[xp-animation](http://expandjs.com/elements/xp-animation).
 
 @element xp-animation-group
-@description A custom element used to manage and harmonize a series of animation
-@keywords web animation, declarative web animation, web app, html5, expandjs, web-components
+@description A custom element used to group multiple animations
+@keywords web animation, expandjs, web app, custom elements, web-components
 @group functionality
+
 @homepage http://expandjs.com/elements/xp-animation-group
 @repository https://github.com/ExpandJS/xp-animation-group
 
 @behavior xp-master-behavior /bower_components/xp-master-behavior/xp-master-behavior.html
 
-@dependency polymer Polymer/polymer#^1.1.0
-@dependency expandjs ExpandJS/expandjs#0.9.11
-@dependency xp-master-behavior ExpandJS/xp-master-behavior#0.9.11
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+@dependency xp-master-behavior ExpandJS/xp-master-behavior#0.10.0
 -->
 
 <link rel="import" href="../polymer/polymer.html">
@@ -32,7 +34,7 @@ It must be used in conjunction with xp-animation.
 
 <dom-module id="xp-animation-group">
 
-    <template>
+    <template strip-whitespace>
 
         <style>
             :host {
@@ -40,7 +42,7 @@ It must be used in conjunction with xp-animation.
             }
         </style>
 
-        <content id="content"></content>
+        <content></content>
 
     </template>
 
@@ -63,6 +65,7 @@ It must be used in conjunction with xp-animation.
              * @event xp-animation-cancel
              * @param {Element} firer
              * @param {Array} animations
+             * @bubbles
              * @cancelable
              */
 
@@ -72,6 +75,7 @@ It must be used in conjunction with xp-animation.
              * @event xp-animation-finish
              * @param {Element} firer
              * @param {Array} animations
+             * @bubbles
              * @cancelable
              */
 
@@ -81,6 +85,7 @@ It must be used in conjunction with xp-animation.
              * @event xp-animation-pause
              * @param {Element} firer
              * @param {Array} animations
+             * @bubbles
              * @cancelable
              */
 
@@ -90,6 +95,7 @@ It must be used in conjunction with xp-animation.
              * @event xp-animation-play
              * @param {Element} firer
              * @param {Array} animations
+             * @bubbles
              * @cancelable
              */
 
@@ -99,6 +105,7 @@ It must be used in conjunction with xp-animation.
              * @event xp-animation-reverse
              * @param {Element} firer
              * @param {Array} animations
+             * @bubbles
              * @cancelable
              */
 
@@ -107,6 +114,7 @@ It must be used in conjunction with xp-animation.
              *
              * @event xp-animation-setup
              * @param {Element} firer
+             * @bubbles
              */
 
             /**
@@ -115,6 +123,7 @@ It must be used in conjunction with xp-animation.
              * @event xp-animation-state
              * @param {Element} firer
              * @param {string} state
+             * @bubbles
              */
 
             /*********************************************************************/
@@ -163,7 +172,7 @@ It must be used in conjunction with xp-animation.
              */
             play: function () {
                 var self = this;
-                if (self.state !== 'running') { XP.delay(self._execute.bind(self, 'play')); }
+                if (self.state !== 'running') { requestAnimationFrame(self._execute.bind(self, 'play')); }
                 return self;
             },
 
@@ -182,31 +191,6 @@ It must be used in conjunction with xp-animation.
             /*********************************************************************/
 
             /**
-             * Set the adaptee.
-             *
-             * @method _adapt
-             * @returns {Object}
-             * @private
-             */
-            _adapt: function () {
-
-                // Vars
-                var self        = this,
-                    Constructor = self.sequence ? SequenceEffect : GroupEffect,
-                    filter      = function (animation) { return animation.adaptee; },
-                    animations  = XP.map(XP.filter(self.animations || [], filter), filter);
-
-                // Setting
-                self._setAdaptee(new Constructor(animations));
-                self._setPlayer(document.timeline.play(self.adaptee));
-
-                // Canceling
-                self.player.cancel();
-
-                return self.adaptee;
-            },
-
-            /**
              * Executes an action.
              *
              * @method _execute
@@ -216,22 +200,16 @@ It must be used in conjunction with xp-animation.
              */
             _execute: function (action) {
 
-                // Asserting
-                XP.assertArgument(XP.has(this.states, action), '1', 'string');
-
                 // Vars
                 var self   = this,
                     player = self.player;
 
-                // Checking
-                if (!self.adaptee) { return self; }
-
                 // Firing
-                if (self.fire('xp-animation-' + action, {firer: self, animations: self.animations}, {bubbles: false, cancelable: true}).defaultPrevented) { return self; }
+                if (!self.animation || self.fire('xp-animation-' + action, {firer: self, animations: self.animations}, {cancelable: true}).defaultPrevented) { return self; }
 
                 // Setting
                 self._setState(self.states[action]);
-                self._setPlayer(self.player || document.timeline.play(self.adaptee));
+                self._setPlayer(self.player || document.timeline.play(self.animation));
 
                 // Canceling
                 if (!player) { self.player.cancel(); }
@@ -242,64 +220,27 @@ It must be used in conjunction with xp-animation.
                 return self;
             },
 
-            /**
-             * Refreshes the element.
-             *
-             * @method _refresh
-             * @returns {Element}
-             * @private
-             */
-            _refresh: function () {
-
-                // Vars
-                var self = this;
-
-                // Canceling
-                if (self.player) { self.player.cancel(); }
-
-                // Adapting
-                self._adapt();
-
-                // Auto play
-                if (self.auto) { self.play(); }
-
-                return self;
-            },
-
-            /**
-             * Returns the slaves map.
-             *
-             * @method _setupSlaves
-             * @returns {Object}
-             * @private
-             */
-            _setupSlaves: function () {
-                return {animations: 'xp-animation'};
-            },
-
             /*********************************************************************/
 
             // OBSERVERS
             observers: [
-                '_refresh(sequence)'
+                '_animationChanged(animations, sequence)'
             ],
 
             // PROPERTIES
             properties: {
 
                 /**
-                 * The adapted object.
+                 * The animation object.
                  *
-                 * @attribute adaptee
+                 * @attribute animation
                  * @type Object
                  * @notifies
                  * @readonly
                  */
-                adaptee: {
+                animation: {
                     notify: true,
-                    readOnly: true,
-                    type: Object,
-                    value: null
+                    readOnly: true
                 },
 
                 /**
@@ -313,7 +254,6 @@ It must be used in conjunction with xp-animation.
                 animations: {
                     notify: true,
                     readOnly: true,
-                    type: Array,
                     value: function () { return []; }
                 },
 
@@ -325,7 +265,6 @@ It must be used in conjunction with xp-animation.
                  * @default false
                  */
                 auto: {
-                    reflectToAttribute: true,
                     type: Boolean,
                     value: false
                 },
@@ -341,9 +280,7 @@ It must be used in conjunction with xp-animation.
                 player: {
                     notify: true,
                     observer: '_playerChanged',
-                    readOnly: true,
-                    type: Object,
-                    value: null
+                    readOnly: true
                 },
 
                 /**
@@ -354,7 +291,6 @@ It must be used in conjunction with xp-animation.
                  * @default false
                  */
                 sequence: {
-                    reflectToAttribute: true,
                     type: Boolean,
                     value: false
                 },
@@ -390,21 +326,65 @@ It must be used in conjunction with xp-animation.
             /*********************************************************************/
 
             // OBSERVER
-            _playerChanged: function (post) {
-                var self = this, listener = function () { if (post.playState === 'finished') { self._setState('finished'); } };
-                if (post && arguments.length > 1) { post.onfinish = listener; }
+            _animationChanged: function () {
+
+                // Vars
+                var self        = this,
+                    Constructor = self.sequence ? SequenceEffect : GroupEffect,
+                    filter      = function (animation) { return animation.animation;},
+                    animations  = XP.map(XP.filter(self.animations || [], filter), filter);
+
+                // Canceling
+                if (self.player) { self.player.cancel(); }
+
+                // Setting
+                self._setAnimation(new Constructor(animations));
+                self._setPlayer(document.timeline.play(self.animation));
+
+                // Canceling
+                self.player.cancel();
+
+                // Auto play
+                if (self.auto) { self.play(); }
             },
 
             // OBSERVER
-            _stateChanged: function (post) {
-                this.fire('xp-animation-state', {firer: this, state: post}, {bubbles: false});
+            _playerChanged: function () {
+
+                // Listening
+                if (this.player) { this.player.onfinish = this._handleFinish.bind(this); }
+            },
+
+            // OBSERVER
+            _stateChanged: function () {
+
+                // Firing
+                this.fire('xp-animation-state', {firer: this, state: this.state});
             },
 
             /*********************************************************************/
 
             // LISTENER
+            attached: function () {
+
+                // Firing
+                this.fire('xp-animation-setup', {firer: this});
+            },
+
+            // LISTENER
             ready: function () {
-                this.fire('xp-animation-setup', {firer: this._refresh()}, {bubbles: false});
+
+                // Mapping
+                this.slavesMap.animations = '.animation';
+            },
+
+            /*********************************************************************/
+
+            // HANDLER
+            _handleFinish: function () {
+
+                // Setting
+                if (this.player.playState === 'finished') { self._setState('finished'); }
             }
         });
     </script>

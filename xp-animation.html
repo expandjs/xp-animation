@@ -7,14 +7,16 @@ The complete set of contributors may be found at https://expandjs.github.io/CONT
 -->
 
 <!--
-This element is used to create dynamic web animations in a declarative way.
+A custom element used to create dynamic web animations in a declarative way.
 
-It can be used in conjunction with xp-animation-group.
+It can be used in conjunction with
+[xp-animation-group](http://expandjs.com/elements/xp-animation-group).
 
 @element xp-animation
 @description A custom element used to create dynamic web animations in a declarative way
-@keywords web animation, declarative web animation, web app, html5, expandjs, web-components
+@keywords web animation, expandjs, web app, custom elements, web-components
 @group functionality
+
 @homepage http://expandjs.com/elements/xp-animation
 @repository https://github.com/ExpandJS/xp-animation
 
@@ -22,10 +24,10 @@ It can be used in conjunction with xp-animation-group.
 @behavior xp-targeter-behavior /bower_components/xp-targeter-behavior/xp-targeter-behavior.html
 
 @dependency web-animations-js Web-Animations/web-animations-js#^2.0.0
-@dependency polymer Polymer/polymer#^1.1.0
-@dependency expandjs ExpandJS/expandjs#0.9.11
-@dependency xp-slave-behavior ExpandJS/xp-slave-behavior#0.9.11
-@dependency xp-targeter-behavior ExpandJS/xp-targeter-behavior#0.9.11
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+@dependency xp-slave-behavior ExpandJS/xp-slave-behavior#0.10.0
+@dependency xp-targeter-behavior ExpandJS/xp-targeter-behavior#0.10.0
 -->
 
 <link rel="import" href="../polymer/polymer.html">
@@ -55,6 +57,7 @@ It can be used in conjunction with xp-animation-group.
          * @event xp-animation-cancel
          * @param {Element} firer
          * @param {Element} target
+         * @bubbles
          * @cancelable
          */
 
@@ -64,6 +67,7 @@ It can be used in conjunction with xp-animation-group.
          * @event xp-animation-finish
          * @param {Element} firer
          * @param {Element} target
+         * @bubbles
          * @cancelable
          */
 
@@ -73,6 +77,7 @@ It can be used in conjunction with xp-animation-group.
          * @event xp-animation-pause
          * @param {Element} firer
          * @param {Element} target
+         * @bubbles
          * @cancelable
          */
 
@@ -82,6 +87,7 @@ It can be used in conjunction with xp-animation-group.
          * @event xp-animation-play
          * @param {Element} firer
          * @param {Element} target
+         * @bubbles
          * @cancelable
          */
 
@@ -91,6 +97,7 @@ It can be used in conjunction with xp-animation-group.
          * @event xp-animation-reverse
          * @param {Element} firer
          * @param {Element} target
+         * @bubbles
          * @cancelable
          */
 
@@ -99,6 +106,7 @@ It can be used in conjunction with xp-animation-group.
          *
          * @event xp-animation-setup
          * @param {Element} firer
+         * @bubbles
          */
 
         /**
@@ -107,6 +115,7 @@ It can be used in conjunction with xp-animation-group.
          * @event xp-animation-state
          * @param {Element} firer
          * @param {string} state
+         * @bubbles
          */
 
         /*********************************************************************/
@@ -155,7 +164,7 @@ It can be used in conjunction with xp-animation-group.
          */
         play: function () {
             var self = this;
-            if (self.state !== 'running') { XP.delay(self._execute.bind(self, 'play')); }
+            if (self.state !== 'running') { requestAnimationFrame(self._execute.bind(self, 'play')); }
             return self;
         },
 
@@ -174,28 +183,6 @@ It can be used in conjunction with xp-animation-group.
         /*********************************************************************/
 
         /**
-         * Set the adaptee.
-         *
-         * @method _adapt
-         * @returns {Object}
-         * @private
-         */
-        _adapt: function () {
-
-            // Vars
-            var self = this;
-
-            // Setting
-            self._setAdaptee(new KeyframeEffect(self.findTarget(), self.keyframes, self._timing()));
-            self._setPlayer(document.timeline.play(self.adaptee));
-
-            // Canceling
-            self.player.cancel();
-
-            return self.adaptee;
-        },
-
-        /**
          * Executes an action.
          *
          * @method _execute
@@ -205,22 +192,16 @@ It can be used in conjunction with xp-animation-group.
          */
         _execute: function (action) {
 
-            // Asserting
-            XP.assertArgument(XP.has(this.states, action), '1', 'string');
-
             // Vars
             var self   = this,
                 player = self.player;
 
-            // Checking
-            if (!self.adaptee) { return self; }
-
             // Firing
-            if (self.fire('xp-animation-' + action, {firer: self, target: self.findTarget()}, {bubbles: false, cancelable: true}).defaultPrevented) { return self; }
+            if (!self.animation || self.fire('xp-animation-' + action, {firer: self, target: self.findTarget()}, {cancelable: true}).defaultPrevented) { return self; }
 
             // Setting
             self._setState(self.states[action]);
-            self._setPlayer(self.player || document.timeline.play(self.adaptee));
+            self._setPlayer(self.player || document.timeline.play(self.animation));
 
             // Canceling
             if (!player) { self.player.cancel(); }
@@ -231,87 +212,27 @@ It can be used in conjunction with xp-animation-group.
             return self;
         },
 
-        /**
-         * Refreshes the element.
-         *
-         * @method _refresh
-         * @returns {Element}
-         * @private
-         */
-        _refresh: function () {
-
-            // Vars
-            var self = this;
-
-            // Canceling
-            if (self.player) { self.player.cancel(); }
-
-            // Adapting
-            self._adapt();
-
-            // Auto play
-            if (self.auto && !self.group) { self.play(); }
-
-            // Propagating
-            if (self.group) { self.group._refresh(); }
-
-            return self;
-        },
-
-        /**
-         * Returns the masters map.
-         *
-         * @method _setupMasters
-         * @returns {Object}
-         * @private
-         */
-        _setupMasters: function () {
-            return {group: 'xp-animation-group'};
-        },
-
-        /**
-         * Returns the timing properties.
-         *
-         * @method _timing
-         * @returns {Object}
-         * @private
-         */
-        _timing: function () {
-            return {
-                delay: this.delay || 0,
-                direction: this.direction,
-                duration: XP.toNumber(this.duration) || 'auto',
-                easing: this.easing,
-                endDelay: this.endDelay || 0,
-                fill: this.fill,
-                iterations: this.iterations,
-                iterationStart: this.iterationStart || 0
-            };
-        },
-
         /*********************************************************************/
 
         // OBSERVERS
         observers: [
-            '_refresh(delay, direction, duration, easing, endDelay, fill, group, iterations, iterationStart, keyframes, target)'
+            '_animationChanged(group, keyframes, target, timing.*)'
         ],
 
         // PROPERTIES
         properties: {
 
             /**
-             * The adapted object.
+             * The animation object.
              *
-             * @attribute adaptee
+             * @attribute animation
              * @type Object
              * @notifies
              * @readonly
              */
-            adaptee: {
+            animation: {
                 notify: true,
-                readOnly: true,
-                type: Object,
-                value: null
+                readOnly: true
             },
 
             /**
@@ -322,7 +243,6 @@ It can be used in conjunction with xp-animation-group.
              * @default false
              */
             auto: {
-                reflectToAttribute: true,
                 type: Boolean,
                 value: false
             },
@@ -334,9 +254,7 @@ It can be used in conjunction with xp-animation-group.
              * @type number
              */
             delay: {
-                reflectToAttribute: true,
-                type: Number,
-                value: null
+                type: Number
             },
 
             /**
@@ -355,7 +273,6 @@ It can be used in conjunction with xp-animation-group.
              * @default "normal"
              */
             direction: {
-                reflectToAttribute: true,
                 type: String,
                 value: 'normal'
             },
@@ -367,9 +284,7 @@ It can be used in conjunction with xp-animation-group.
              * @type number
              */
             duration: {
-                reflectToAttribute: true,
-                type: Number,
-                value: null
+                type: Number
             },
 
             /**
@@ -380,7 +295,6 @@ It can be used in conjunction with xp-animation-group.
              * @default "linear"
              */
             easing: {
-                reflectToAttribute: true,
                 type: String,
                 value: 'linear'
             },
@@ -392,9 +306,7 @@ It can be used in conjunction with xp-animation-group.
              * @type number
              */
             endDelay: {
-                reflectToAttribute: true,
-                type: Number,
-                value: null
+                type: Number
             },
 
             /**
@@ -413,7 +325,6 @@ It can be used in conjunction with xp-animation-group.
              * @default "none"
              */
             fill: {
-                reflectToAttribute: true,
                 type: String,
                 value: 'none'
             },
@@ -426,7 +337,6 @@ It can be used in conjunction with xp-animation-group.
              * @default 1
              */
             iterations: {
-                reflectToAttribute: true,
                 type: Number,
                 value: 1
             },
@@ -438,9 +348,7 @@ It can be used in conjunction with xp-animation-group.
              * @type number
              */
             iterationStart: {
-                reflectToAttribute: true,
-                type: Number,
-                value: null
+                type: Number
             },
 
             /**
@@ -481,9 +389,7 @@ It can be used in conjunction with xp-animation-group.
             player: {
                 notify: true,
                 observer: '_playerChanged',
-                readOnly: true,
-                type: Object,
-                value: null
+                readOnly: true
             },
 
             /**
@@ -502,6 +408,21 @@ It can be used in conjunction with xp-animation-group.
                 reflectToAttribute: true,
                 type: String,
                 value: 'idle'
+            },
+
+            /**
+             * The animation's timing.
+             *
+             * @attribute timing
+             * @type Object
+             * @notifies
+             * @readonly
+             */
+            timing: {
+                computed: '_computeTiming(delay, direction, duration, easing, endDelay, fill, iterations, iterationStart)',
+                notify: true,
+                type: Object,
+                value: function () { return {}; }
             }
         },
 
@@ -517,29 +438,82 @@ It can be used in conjunction with xp-animation-group.
 
         /*********************************************************************/
 
+        // COMPUTER
+        _computeTiming: function (delay, direction, duration, easing, endDelay, fill, iterations, iterationStart) {
+            return {
+                delay:          delay || 0,
+                direction:      direction || 'normal',
+                duration:       XP.toNumber(duration) || 'auto',
+                easing:         easing || 'linear',
+                endDelay:       endDelay || 0,
+                fill:           fill || 'none',
+                iterations:     iterations || 1,
+                iterationStart: iterationStart || 0
+            };
+        },
+
+        /*********************************************************************/
+
         // OBSERVER
-        _playerChanged: function (post) {
-            var self = this, listener = function () { if (post.playState === 'finished') { self._setState('finished'); } };
-            if (post && arguments.length > 1) { post.onfinish = listener; }
+        _animationChanged: function () {
+
+            // Vars
+            var self = this;
+
+            // Canceling
+            if (self.player) { self.player.cancel(); }
+
+            // Setting
+            self._setAnimation(new KeyframeEffect(self.findTarget(), self.keyframes, self.timing));
+            self._setPlayer(document.timeline.play(self.animation));
+
+            // Canceling
+            self.player.cancel();
+
+            // Auto play
+            if (self.auto && !self.group) { self.play(); }
+
+            // Propagating
+            if (self.group) { self.group._animationChanged(); }
         },
 
         // OBSERVER
-        _stateChanged: function (post) {
-            this.fire('xp-animation-state', {firer: this, state: post}, {bubbles: false});
+        _playerChanged: function () {
+
+            // Listening
+            if (this.player) { this.player.onfinish = this._handleFinish.bind(this); }
+        },
+
+        // OBSERVER
+        _stateChanged: function () {
+
+            // Firing
+            this.fire('xp-animation-state', {firer: this, state: this.state});
         },
 
         /*********************************************************************/
 
         // LISTENER
+        attached: function () {
+
+            // Firing
+            this.fire('xp-animation-setup', {firer: this});
+        },
+
+        // LISTENER
         ready: function () {
-            this.fire('xp-animation-setup', {firer: this._refresh()}, {bubbles: false});
+
+            // Mapping
+            this.mastersMap.group = '.animation-group';
         },
 
         /*********************************************************************/
 
         // HANDLER
-        _handleStop: function (event) {
-            event.stopPropagation();
+        _handleFinish: function () {
+
+            // Setting
+            if (this.player.playState === 'finished') { self._setState('finished'); }
         }
     });
 </script>
